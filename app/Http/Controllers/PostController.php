@@ -10,6 +10,11 @@ use App\Transformers\PostTransformer;
 
 class PostController extends Controller
 {
+  public function index() {
+    $posts = Post::latestFirst()->get();
+    return fractal()->collection($posts)->parseIncludes(['user'])->transformWith(new PostTransformer)->toArray();
+  }
+
     public function store(StorePostRequest $request) {
 
       $post = new Post;
