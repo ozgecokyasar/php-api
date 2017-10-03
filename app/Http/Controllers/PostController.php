@@ -6,6 +6,7 @@ use App\Post;
 use App\Review;
 use Illuminate\Http\Request;
 use App\Http\Requests\StorePostRequest;
+use App\Transformers\PostTransformer;
 
 class PostController extends Controller
 {
@@ -13,13 +14,15 @@ class PostController extends Controller
 
       $post = new Post;
       $post->title= $request->title;
-      $post->user()->associate($requeast->user());
+      $post->user()->associate($request->user());
 
       $review = new Review;
-      $review->body = $requeast->body;
+      $review->body = $request->body;
       $review->user()->associate($request->user());
 
       $post->save();
       $post->reviews()->save($review);
+
+      return fractal()->item($post)->parseIncludes(['user', 'reviews', 'reviews.user'])->transformWith(new PostTransformer)->toArray();
     }
 }
