@@ -7,12 +7,15 @@ use App\Review;
 use Illuminate\Http\Request;
 use App\Http\Requests\StorePostRequest;
 use App\Transformers\PostTransformer;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 
 class PostController extends Controller
 {
   public function index() {
-    $posts = Post::latestFirst()->get();
-    return fractal()->collection($posts)->parseIncludes(['user'])->transformWith(new PostTransformer)->toArray();
+    $posts = Post::latestFirst()->paginate(3);
+    $postsCollection = $posts->getCollection();
+
+    return fractal()->collection($postsCollection)->parseIncludes(['user'])->transformWith(new PostTransformer)->paginateWith(new IlluminatePaginatorAdapter($posts))->toArray();
   }
 
     public function store(StorePostRequest $request) {
